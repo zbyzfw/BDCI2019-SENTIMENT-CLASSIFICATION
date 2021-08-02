@@ -90,8 +90,11 @@ class InputFeatures(object):
         
 def read_examples(input_file, is_training):
     df=pd.read_csv(input_file)
+    # print(df['content'].head())
     examples=[]
     for val in df[['id','content','title','label']].values:
+        if val[0] == 100675:
+            print(val)
         examples.append(InputExample(guid=val[0],text_a=val[1],text_b=val[2],label=val[3]))
     return examples
 
@@ -437,7 +440,7 @@ def main():
     config = BertConfig.from_pretrained(args.model_name_or_path, num_labels=3)
     
     # Prepare model
-    model = BertForSequenceClassification.from_pretrained(args.model_name_or_path,args,config=config)
+    model = BertForSequenceClassification.from_pretrained(args.output_dir,args,config=config)
 
 
         
@@ -613,12 +616,12 @@ def main():
                 loss.backward()
 
             if (nb_tr_steps + 1) % args.gradient_accumulation_steps == 0:
-                if args.fp16:
-                    # modify learning rate with special warm up BERT uses
-                    # if args.fp16 is False, BertAdam is used that handles this automatically
-                    lr_this_step = args.learning_rate * warmup_linear.get_lr(global_step, args.warmup_proportion)
-                    for param_group in optimizer.param_groups:
-                        param_group['lr'] = lr_this_step
+                # if args.fp16:
+                #     # modify learning rate with special warm up BERT uses
+                #     # if args.fp16 is False, BertAdam is used that handles this automatically
+                #     lr_this_step = args.learning_rate * warmup_linear.get_lr(global_step, args.warmup_proportion)
+                #     for param_group in optimizer.param_groups:
+                #         param_group['lr'] = lr_this_step
                 optimizer.step()
                 scheduler.step()
                 optimizer.zero_grad()
